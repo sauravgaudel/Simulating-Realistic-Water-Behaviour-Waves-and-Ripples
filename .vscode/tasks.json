@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Water Sim",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-O2",
+                "-Wall",
+                "src/main.cpp",
+                "src/water.cpp",
+                "src/renderer.cpp",
+                "-I./include",
+                "-I./include/glm",
+                "-L./lib",
+                "-lfreeglut",
+                "-lglew32",
+                "-lopengl32",
+                "-lglu32",
+                "-lgdi32",
+                "-o",
+                "bin/water.exe"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Build & Run",
+            "type": "shell",
+            "command": "g++ -std=c++17 -O2 -Wall src/main.cpp src/water.cpp src/renderer.cpp -I./include -I./include/glm -L./lib -lfreeglut -lglew32 -lopengl32 -lglu32 -lgdi32 -o bin/water.exe && cd bin && ./water.exe",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$gcc"
+        }
+    ]
+}
