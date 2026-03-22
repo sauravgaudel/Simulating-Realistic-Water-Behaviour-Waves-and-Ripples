@@ -5,7 +5,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-// ── Procedural textures ─────────────────────────────────────────────
+// ── Procedural textures ────────────────────────────────────────────
 static GLuint makeTile() {
     const int S=512; std::vector<unsigned char> d(S*S*3);
     for(int y=0;y<S;y++) for(int x=0;x<S;x++){
