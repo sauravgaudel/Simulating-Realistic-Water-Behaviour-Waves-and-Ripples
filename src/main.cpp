@@ -64,7 +64,7 @@ void idle() {
                     sphereZ      = ballTargetZ;
 
                     // splash on entry
-                    float impactStrength = glm::clamp(-ballVelY * 0.35f, 0.06f, 0.45f);
+                    float impactStrength = clamp(-ballVelY * 0.35f, 0.06f, 0.45f);
                     float u = (sphereX + 1.f) * 0.5f;
                     float v = (sphereZ + 1.f) * 0.5f;
                     gWater->addDrop(u, v, 0.10f,  impactStrength);
@@ -75,7 +75,7 @@ void idle() {
 
             if (ballInWater) {
                 // submerged depth below rest position
-                float submerged = glm::clamp((restY - ballY) / ballRadius, -1.0f, 1.0f);
+                float submerged = clamp((restY - ballY) / ballRadius, -1.0f, 1.0f);
 
                 // buoyancy only when below rest, gravity always
                 float netForce = -gravity + buoyancy * submerged;
@@ -144,29 +144,29 @@ void keyboard(unsigned char key, int, int) {
 }
 }
 
-glm::vec3 getCamPos() {
-    float cx = cosf(glm::radians(camAngleX));
-    return glm::vec3(
-        sinf(glm::radians(camAngleY)) * cx,
-        sinf(glm::radians(camAngleX)),
-        cosf(glm::radians(camAngleY)) * cx) * camDist;
+Vec3 getCamPos() {
+    float cx = cosf(radians(camAngleX));
+    return Vec3(
+        sinf(radians(camAngleY)) * cx,
+        sinf(radians(camAngleX)),
+        cosf(radians(camAngleY)) * cx) * camDist;
 }
 
-glm::vec2 rayToWater(int x, int y) {
-    glm::vec3 eye = getCamPos();
-    glm::mat4 proj = glm::perspective(glm::radians(45.f),(float)winW/winH,0.1f,100.f);
-    glm::mat4 view = glm::lookAt(eye, glm::vec3(0), glm::vec3(0,1,0));
+Vec2 rayToWater(int x, int y) {
+    Vec3 eye = getCamPos();
+    Mat4 proj = perspective(45.f,(float)winW/winH,0.1f,100.f);
+    Mat4 view = lookAt(eye, Vec3(0), Vec3(0,1,0));
     float nx = (2.f*x)/winW - 1.f;
     float ny = 1.f - (2.f*y)/winH;
-    glm::vec4 clip(nx, ny, -1, 1);
-    glm::vec4 eye4 = glm::inverse(proj) * clip;
-    eye4 = glm::vec4(eye4.x, eye4.y, -1, 0);
-    glm::vec3 dir = glm::normalize(glm::vec3(glm::inverse(view) * eye4));
-    if (fabsf(dir.y) < 1e-5f) return glm::vec2(9999);
+    Vec4 clip(nx, ny, -1, 1);
+    Vec4 eye4 = inverse(proj) * clip;
+    eye4 = Vec4(eye4.x, eye4.y, -1, 0);
+    Vec3 dir = ((inverse(view) * eye4)).xyz().normalize();
+    if (fabsf(dir.y) < 1e-5f) return Vec2(9999);
     float t = -eye.y / dir.y;
-    if (t < 0) return glm::vec2(9999);
-    glm::vec3 hit = eye + dir * t;
-    return glm::vec2((hit.x+1)*0.5f, (hit.z+1)*0.5f);
+    if (t < 0) return Vec2(9999);
+    Vec3 hit = eye + dir * t;
+    return Vec2((hit.x+1)*0.5f, (hit.z+1)*0.5f);
 }
 
 void mouseButton(int btn, int state, int x, int y) {
@@ -174,10 +174,10 @@ void mouseButton(int btn, int state, int x, int y) {
     lastX = x; lastY = y;
     draggingWater = draggingSphere = false;
     if (state == GLUT_DOWN && btn == GLUT_LEFT_BUTTON) {
-        glm::vec2 uv = rayToWater(x, y);
+        Vec2 uv = rayToWater(x, y);
         if (uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1) {
             float sx = (sphereX+1)*0.5f, sz = (sphereZ+1)*0.5f;
-            if (glm::length(uv - glm::vec2(sx,sz)) < 0.12f)
+            if ((uv - Vec2(sx,sz)).length() < 0.12f)
                 draggingSphere = true;
             else {
                 draggingWater = true;
@@ -192,30 +192,30 @@ void mouseMotion(int x, int y) {
     lastX = x; lastY = y;
     if (settingLight && mouseBtn == GLUT_LEFT_BUTTON) {
         lightAY += dx*0.5f; lightAX += dy*0.5f;
-        lightAX = glm::clamp(lightAX, 5.f, 85.f); return;
+        lightAX = clamp(lightAX, 5.f, 85.f); return;
     }
     if (draggingWater && mouseBtn == GLUT_LEFT_BUTTON) {
-        glm::vec2 uv = rayToWater(x,y);
+        Vec2 uv = rayToWater(x,y);
         if (uv.x>=0&&uv.x<=1&&uv.y>=0&&uv.y<=1)
             gWater->addDrop(uv.x, uv.y, 0.03f, 0.02f);
         return;
     }
     if (draggingSphere && mouseBtn == GLUT_LEFT_BUTTON) {
-        glm::vec2 uv = rayToWater(x,y);
-        sphereX = glm::clamp(uv.x*2-1, -0.7f, 0.7f);
-        sphereZ = glm::clamp(uv.y*2-1, -0.7f, 0.7f);
+        Vec2 uv = rayToWater(x,y);
+        sphereX = clamp(uv.x*2-1, -0.7f, 0.7f);
+        sphereZ = clamp(uv.y*2-1, -0.7f, 0.7f);
         return;
     }
     if (mouseBtn == GLUT_RIGHT_BUTTON) {
         camAngleY += dx*0.4f;
-        camAngleX = glm::clamp(camAngleX + dy*0.4f, 5.f, 85.f);
+        camAngleX = clamp(camAngleX + dy*0.4f, 5.f, 85.f);
     }
     if (mouseBtn == GLUT_MIDDLE_BUTTON)
-        camDist = glm::clamp(camDist - dy*0.01f, 1.5f, 8.f);
+        camDist = clamp(camDist - dy*0.01f, 1.5f, 8.f);
 }
 
 void mouseWheel(int, int dir, int, int) {
-    camDist = glm::clamp(camDist - dir*0.15f, 1.5f, 8.f);
+    camDist = clamp(camDist - dir*0.15f, 1.5f, 8.f);
 }
 
 int main(int argc, char** argv) {

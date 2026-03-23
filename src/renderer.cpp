@@ -36,7 +36,7 @@ static GLuint makeSky() {
     const int S=256; GLuint t; glGenTextures(1,&t);
     glBindTexture(GL_TEXTURE_CUBE_MAP,t);
     std::vector<unsigned char> img(S*S*3);
-    glm::vec3 sun=glm::normalize(glm::vec3(0.6f,0.8f,0.4f));
+    Vec3 sun=Vec3(0.6f,0.8f,0.4f).normalize();
     for(int f=0;f<6;f++){
         for(int j=0;j<S;j++) for(int i=0;i<S;i++){
             float s=(i+.5f)/S*2-1, tt=(j+.5f)/S*2-1;
@@ -47,18 +47,18 @@ static GLuint makeSky() {
             else if(f==3){nx=s;ny=-1;nz=-tt;}
             else if(f==4){nx=s;ny=-tt;nz=1;}
             else{nx=-s;ny=-tt;nz=-1;}
-            glm::vec3 dir=glm::normalize(glm::vec3(nx,ny,nz));
+            Vec3 dir=Vec3(nx,ny,nz).normalize();
             float r,g,b;
             if(dir.y>0){
                 float u=dir.y;
                 r=0.40f-u*0.25f; g=0.60f-u*0.15f; b=0.90f+u*0.08f;
-                float sd=glm::dot(dir,sun);
+                float sd=dir.dot(sun);
                 if(sd>0.9998f){r=1;g=1;b=0.95f;}
                 else if(sd>0.998f){float a=(sd-0.998f)/0.0018f;r+=a*(1-r);g+=a*(1-g);b+=a*(0.95f-b);}
             } else {
                 r=0.72f;g=0.68f;b=0.58f;
             }
-            r=glm::clamp(r,0.f,1.f);g=glm::clamp(g,0.f,1.f);b=glm::clamp(b,0.f,1.f);
+            r=clamp(r,0.f,1.f);g=clamp(g,0.f,1.f);b=clamp(b,0.f,1.f);
             int idx=(j*S+i)*3;
             img[idx]=(unsigned char)(r*255);img[idx+1]=(unsigned char)(g*255);img[idx+2]=(unsigned char)(b*255);
         }
@@ -243,20 +243,20 @@ void Renderer::render(Water& water,
                       int w,int h)
 {
     // Camera
-    float cy=cosf(glm::radians(cax));
-    glm::vec3 eye=glm::vec3(
-        sinf(glm::radians(cay))*cy,
-        sinf(glm::radians(cax)),
-        cosf(glm::radians(cay))*cy)*cdist;
-    glm::mat4 view=glm::lookAt(eye,glm::vec3(0),glm::vec3(0,1,0));
-    glm::mat4 proj=glm::perspective(glm::radians(45.f),(float)w/h,0.05f,50.f);
-    glm::mat4 vp=proj*view;
+    float cy=cosf(radians(cax));
+    Vec3 eye=Vec3(
+        sinf(radians(cay))*cy,
+        sinf(radians(cax)),
+        cosf(radians(cay))*cy)*cdist;
+    Mat4 view=lookAt(eye,Vec3(0),Vec3(0,1,0));
+    Mat4 proj=perspective(45.f,(float)w/h,0.05f,50.f);
+    Mat4 vp=proj*view;
 
     // Light direction
-    glm::vec3 L=glm::normalize(glm::vec3(
-        sinf(glm::radians(lay))*cosf(glm::radians(lax)),
-        sinf(glm::radians(lax)),
-        cosf(glm::radians(lay))*cosf(glm::radians(lax))));
+    Vec3 L=Vec3(
+        sinf(radians(lay))*cosf(radians(lax)),
+        sinf(radians(lax)),
+        cosf(radians(lay))*cosf(radians(lax)));
 
     // ── Caustics pass ─────────────────────────────────────────
     {
@@ -290,7 +290,7 @@ void Renderer::render(Water& water,
     // Skybox
     glDepthMask(GL_FALSE); glDisable(GL_DEPTH_TEST);
     glUseProgram(m_progSky);
-    setUniformMat4(m_progSky,"uView",glm::mat4(glm::mat3(view)));
+    setUniformMat4(m_progSky,"uView",mat4(mat3(view)));
     setUniformMat4(m_progSky,"uProj",proj);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP,m_skyTex);
@@ -317,9 +317,9 @@ void Renderer::render(Water& water,
    // Sphere — use m_ballY for Y position so drop animation works
 float R = 0.25f;
 float sphereWorldY = m_ballY;  // animated Y during drop, resting Y otherwise
-glm::mat4 sModel = glm::scale(
-    glm::translate(glm::mat4(1), glm::vec3(sx, sphereWorldY, sz)),
-    glm::vec3(R));
+Mat4 sModel = scale(
+    translate(Mat4(), Vec3(sx, sphereWorldY, sz)),
+    Vec3(R));
 glUseProgram(m_progSphere);
 setUniformMat4(m_progSphere, "uMVP",     vp * sModel);
 setUniformMat4(m_progSphere, "uModel",   sModel);

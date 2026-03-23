@@ -11,10 +11,7 @@
 #include <GL/freeglut.h>
 
 // GLM
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
+#include "math3d.h"
 // STL
 #include <cstdio>
 #include <cstdlib>
@@ -81,6 +78,6 @@ inline void setUniform1i(GLuint p, const char* n, int v)          { glUniform1i(
 inline void setUniform1f(GLuint p, const char* n, float v)        { glUniform1f(glGetUniformLocation(p,n),v); }
 inline void setUniform2f(GLuint p, const char* n, float a,float b){ glUniform2f(glGetUniformLocation(p,n),a,b); }
 inline void setUniform3f(GLuint p, const char* n, float a,float b,float c){ glUniform3f(glGetUniformLocation(p,n),a,b,c); }
-inline void setUniformMat4(GLuint p, const char* n, const glm::mat4& m) {
-    glUniformMatrix4fv(glGetUniformLocation(p,n),1,GL_FALSE,glm::value_ptr(m));
+inline void setUniformMat4(GLuint p, const char* n, const Mat4& m) {
+    glUniformMatrix4fv(glGetUniformLocation(p,n),1,GL_FALSE,m.ptr());
 }
